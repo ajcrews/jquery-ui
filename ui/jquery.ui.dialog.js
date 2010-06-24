@@ -306,12 +306,30 @@ $.widget("ui.dialog", {
 
 		// set focus to the first tabbable element in the content area or the first button
 		// if there are no tabbable elements, set focus on the dialog itself
-		$([])
-			.add(uiDialog.find('.ui-dialog-content :tabbable:first'))
-			.add(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'))
-			.add(uiDialog)
-			.filter(':first')
-			.focus();
+		var fSetFocus = function() {
+			var arrTab = [],
+				$tab;
+				
+			arrTab.push(uiDialog.find('.ui-dialog-content :tabbable:first'));
+			arrTab.push(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'));
+			arrTab.push(uiDialog);
+			
+			// Focus first populated selection
+			for (var i = 0; i < arrTab.length; i++) {
+				$tab = arrTab[i];
+				if ($tab.length) {
+					$tab.focus();
+					break;
+				}
+			}
+		};
+		
+		// TODO: Find a proper fix for Firefox 3.6.x
+		if ($.browser.mozilla) {
+			window.setTimeout(fSetFocus, 0)
+		} else {
+			fSetFocus();
+		}
 
 		self._trigger('open');
 		self._isOpen = true;
