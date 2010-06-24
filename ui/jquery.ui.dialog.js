@@ -46,6 +46,7 @@ $.widget("ui.dialog", {
 		title: '',
 		width: 300,
 		zIndex: 1000,
+		focusSelector: null,
 		focusFilter: ''
 	},
 	_create: function() {
@@ -307,20 +308,24 @@ $.widget("ui.dialog", {
 
 		// set focus to the first tabbable element in the content area or the first button
 		// if there are no tabbable elements, set focus on the dialog itself
-		var arrTab = [],
-			$tab;
+		if (!options.focusSelector) {
+			var arrTab = [],
+				$tab;
+				
+			arrTab.push(uiDialog.find('.ui-dialog-content :tabbable:not(' + options.focusFilter + '):first').filter(':not(.close)'));
+			arrTab.push(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'));
+			arrTab.push(uiDialog);
 			
-		arrTab.push(uiDialog.find('.ui-dialog-content :tabbable:not(' + options.focusFilter + '):first').filter(':not(.close)'));
-		arrTab.push(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'));
-		arrTab.push(uiDialog);
-		
-		// Focus first populated selection
-		for (var i = 0; i < arrTab.length; i++) {
-			$tab = arrTab[i];
-			if ($tab.length) {
-				$tab.focus();
-				break;
+			// Focus first populated selection
+			for (var i = 0; i < arrTab.length; i++) {
+				$tab = arrTab[i];
+				if ($tab.length) {
+					$tab.focus();
+					break;
+				}
 			}
+		} else {
+			uiDialog.find(options.focusSelector).focus();
 		}
 
 		self._trigger('open');
