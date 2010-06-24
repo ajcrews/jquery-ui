@@ -284,65 +284,71 @@ $.widget("ui.dialog", {
 		self._position(options.position);
 
 		// Handle show animation
-		var fShowCallback = function(event) {
-			self.moveToTop(true);
-	
-			// prevent tabbing out of modal dialogs
-			if (options.modal) {
-				uiDialog.bind('keypress.ui-dialog', function(event) {
-					if (event.keyCode !== $.ui.keyCode.TAB) {
-						return;
-					}
-		
-					var tabbables = $(':tabbable', this),
-						first = tabbables.filter(':first'),
-						last  = tabbables.filter(':last');
-		
-					if (event.target === last[0] && !event.shiftKey) {
-						first.focus(1);
-						return false;
-					} else if (event.target === first[0] && event.shiftKey) {
-						last.focus(1);
-						return false;
-					}
-				});
-			}
-	
-			// set focus to the first tabbable element in the content area or the first button
-			// if there are no tabbable elements, set focus on the dialog itself
-			if (!options.focusSelector) {
-				var arrTab = [],
-					$tab;
-					
-				arrTab.push(uiDialog.find('.ui-dialog-content :tabbable:not(' + options.focusFilter + '):first').filter(':not(.close)'));
-				arrTab.push(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'));
-				arrTab.push(uiDialog);
-				
-				// Focus first populated selection
-				for (var i = 0; i < arrTab.length; i++) {
-					$tab = arrTab[i];
-					if ($tab.length) {
-						$tab.focus();
-						break;
-					}
-				}
-			} else {
-				uiDialog.find(options.focusSelector).focus();
-			}
-		};
-		
 		if (options.show) {
-			uiDialog.show(options.show, fShowCallback);
+			uiDialog.show(options.show, function() {
+				self._handleFocus();
+			});
 		} else {
 			uiDialog.show();
 			
-			fShowCallback();
+			self._handleFocus();
 		}
 
 		self._trigger('open');
 		self._isOpen = true;
 
 		return self;
+	},
+
+	_handleFocus: function() {
+		var self = this,
+			options = self.options,
+			uiDialog = self.uiDialog;
+			
+		self.moveToTop(true);
+
+		// prevent tabbing out of modal dialogs
+		if (options.modal) {
+			uiDialog.bind('keypress.ui-dialog', function(event) {
+				if (event.keyCode !== $.ui.keyCode.TAB) {
+					return;
+				}
+	
+				var tabbables = $(':tabbable', this),
+					first = tabbables.filter(':first'),
+					last  = tabbables.filter(':last');
+	
+				if (event.target === last[0] && !event.shiftKey) {
+					first.focus(1);
+					return false;
+				} else if (event.target === first[0] && event.shiftKey) {
+					last.focus(1);
+					return false;
+				}
+			});
+		}
+
+		// set focus to the first tabbable element in the content area or the first button
+		// if there are no tabbable elements, set focus on the dialog itself
+		if (!options.focusSelector) {
+			var arrTab = [],
+				$tab;
+				
+			arrTab.push(uiDialog.find('.ui-dialog-content :tabbable:not(' + options.focusFilter + '):first').filter(':not(.close)'));
+			arrTab.push(uiDialog.find('.ui-dialog-buttonpane :tabbable:first'));
+			arrTab.push(uiDialog);
+			
+			// Focus first populated selection
+			for (var i = 0; i < arrTab.length; i++) {
+				$tab = arrTab[i];
+				if ($tab.length) {
+					$tab.focus();
+					break;
+				}
+			}
+		} else {
+			uiDialog.find(options.focusSelector).focus();
+		}
 	},
 
 	_createButtons: function(buttons) {
